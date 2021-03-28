@@ -6,22 +6,22 @@ namespace Pandawa\Tracing\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Pandawa\Tracing\Contract\Tracer;
 use Pandawa\Tracing\Event;
-use Pandawa\Tracing\Transaction;
+use Pandawa\Tracing\Transaction\HttpServerTransaction;
+use Pandawa\Tracing\Util;
 
 /**
  * @author  Iqbal Maulana <iq.bluejack@gmail.com>
  */
 final class Middleware
 {
-    private ?Transaction $transaction = null;
+    private ?HttpServerTransaction $transaction = null;
 
     public function handle(Request $request, Closure $next)
     {
         if (app()->bound(Tracer::class)) {
-            $this->transaction = new Transaction();
+            $this->transaction = new HttpServerTransaction();
             $this->transaction->start($request);
         }
 
@@ -34,19 +34,12 @@ final class Middleware
             $this->transaction->finish($response);
 
             app(Tracer::class)->capture(new Event(
-                array_merge($this->transaction->toArray(), ['__tag__:__hostname__' => $this->getHostName()]),
-                $this->getServerIp()
+                array_merge(
+                    $this->transaction->toArray(),
+                    ['__tag__:__hostname__' => Util::getHostname()]
+                ),
+                Util::getServerIp()
             ));
         }
-    }
-
-    private function getHostName(): string
-    {
-        return gethostname();
-    }
-
-    private function getServerIp(): string
-    {
-        return gethostbyname($this->getHostName());
     }
 }

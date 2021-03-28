@@ -2,16 +2,17 @@
 
 declare(strict_types=1);
 
-namespace Pandawa\Tracing;
+namespace Pandawa\Tracing\Transaction;
 
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Pandawa\Tracing\Util;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
  * @author  Iqbal Maulana <iq.bluejack@gmail.com>
  */
-final class Transaction
+final class HttpServerTransaction
 {
     private array $data = [];
 
@@ -24,7 +25,7 @@ final class Transaction
             'path'         => '/'.ltrim($request->path(), '/'),
             'full_url'     => $request->fullUrl(),
             'method'       => strtoupper($request->method()),
-            'headers'      => $this->headers($request->headers->all()),
+            'headers'      => Util::flattenHeaders($request->headers->all()),
             'query_params' => $request->query->all(),
             'params'       => $request->isJson() ? $request->json()->all() : $request->request->all(),
             'client_ip'    => $request->ip(),
@@ -36,7 +37,7 @@ final class Transaction
     {
         $this->data['finish_time'] = microtime(true);
         $this->data['response'] = array_filter([
-            'headers'     => $this->headers($response->headers->all()),
+            'headers'     => Util::flattenHeaders($response->headers->all()),
             'status_code' => $response->getStatusCode(),
             'body'        => $this->getBody($response),
         ]);
@@ -45,17 +46,6 @@ final class Transaction
     public function toArray(): array
     {
         return $this->data;
-    }
-
-    private function headers(array $headers): array
-    {
-        return array_map(function ($headers) {
-            if (is_array($headers)) {
-                return implode(';', $headers);
-            }
-
-            return $headers;
-        }, $headers);
     }
 
     private function getBody(Response $response)

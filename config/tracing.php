@@ -1,12 +1,19 @@
 <?php
 
 return [
+    // Default tracing logger
     'default' => env('TRACING_DEFAULT', 'null'),
 
+    // When left false the tracing will run in sync mode
     'capture_in_queue' => env('TRACING_CAPTURE_IN_QUEUE', false),
 
+    // Determine queue connection. Config capture_in_queue should be true or string
     'queue_connection' => env('TRACING_QUEUE_CONNECTION'),
 
+    // Trace pavana http client. Register the service key of pavana http client
+    'pavana' => [],
+
+    // List of logger driver
     'loggers' => [
         'aliyun' => [
             'access_key_id'     => env('ALIYUN_SLS_ACCESS_KEY_ID'),

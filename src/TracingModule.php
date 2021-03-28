@@ -6,9 +6,11 @@ namespace Pandawa\Tracing;
 
 use Illuminate\Contracts\Http\Kernel as HttpKernelInterface;
 use Pandawa\Component\Module\AbstractModule;
+use Pandawa\Pavana\Contract\HttpClient;
 use Pandawa\Tracing\Contract\Logger;
 use Pandawa\Tracing\Contract\Tracer as TracerContract;
 use Pandawa\Tracing\Middleware\Middleware;
+use Pandawa\Tracing\Plugin\PavanaTracePlugin;
 
 /**
  * @author  Iqbal Maulana <iq.bluejack@gmail.com>
@@ -35,6 +37,13 @@ final class TracingModule extends AbstractModule
         $httpKernel = $this->app->make(HttpKernelInterface::class);
 
         $httpKernel->prependMiddleware(Middleware::class);
+
+        foreach ((array) $this->app['config']['tracing.pavana'] as $key => $value) {
+            $service = is_int($key) ? $value : $key;
+            $options = is_int($key) ? [] : $value;
+
+            $this->addPavanaPlugin($service, $options);
+        }
     }
 
     protected function init(): void
@@ -46,5 +55,19 @@ final class TracingModule extends AbstractModule
 
         $this->app->singleton(TracerContract::class, Tracer::class);
         $this->app->singleton(Middleware::class);
+    }
+
+    private function addPavanaPlugin(string $service, array $options = [])
+    {
+        $service = $this->app[$service];
+
+        if ($service instanceof HttpClient) {
+            $service->addPlugin(
+                new PavanaTracePlugin(
+                    $this->app[TracerContract::class],
+                    $options['topic'] ?? null,
+                )
+            );
+        }
     }
 }
