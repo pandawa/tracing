@@ -6,6 +6,7 @@ namespace Pandawa\Tracing;
 
 use Pandawa\Tracing\Contract\Logger;
 use Pandawa\Tracing\Contract\Tracer as TracerContract;
+use Pandawa\Tracing\Job\CaptureEvent;
 
 /**
  * @author  Iqbal Maulana <iq.bluejack@gmail.com>
@@ -37,9 +38,7 @@ final class Tracer implements TracerContract
 
     private function captureLater(Event $event, $queue, $connection): void
     {
-        $job = dispatch(function () use ($event) {
-            $this->logger->log($event);
-        });
+        $job = new CaptureEvent($event);
 
         if (is_string($queue)) {
             $job->onQueue($queue);
@@ -48,5 +47,7 @@ final class Tracer implements TracerContract
         if ($connection) {
             $job->onConnection($connection);
         }
+
+        dispatch($job);
     }
 }
