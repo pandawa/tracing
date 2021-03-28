@@ -42,8 +42,9 @@ final class TracingModule extends AbstractModule
         $this->mergeConfigFrom(__DIR__.'/../config/tracing.php', 'tracing');
 
         $this->app->singleton(LogManager::class);
-        $this->app->alias(Logger::class, LogManager::class);
+        $this->app->alias(LogManager::class, Logger::class);
 
         $this->app->singleton(TracerContract::class, Tracer::class);
+        $this->app->singleton(Middleware::class);
     }
 }

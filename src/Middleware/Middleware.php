@@ -16,7 +16,7 @@ use Pandawa\Tracing\Transaction;
  */
 final class Middleware
 {
-    private ?Transaction $transaction;
+    private ?Transaction $transaction = null;
 
     public function handle(Request $request, Closure $next)
     {
@@ -28,13 +28,13 @@ final class Middleware
         return $next($request);
     }
 
-    public function terminate(Request $request, Response $response): void
+    public function terminate($request, $response): void
     {
         if ($this->transaction) {
             $this->transaction->finish($response);
 
             app(Tracer::class)->capture(new Event(
-                array_merge($this->transaction->toArray(), ['__hostname__' => $this->getHostName()]),
+                array_merge($this->transaction->toArray(), ['__tag__:__hostname__' => $this->getHostName()]),
                 $this->getServerIp()
             ));
         }
