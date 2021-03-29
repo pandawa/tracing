@@ -43,6 +43,8 @@ final class PavanaTracePlugin implements Plugin
                 Util::getServerIp(),
                 $this->topic
             ));
+
+            return $response;
         });
     }
 }

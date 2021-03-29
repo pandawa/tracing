@@ -25,12 +25,12 @@ final class HttpClientTransaction
     {
         $this->data['op'] = 'http.client';
         $this->data['requested_at'] = date('Y-m-d H:i:s');
-        $this->data['request'] = array_filter([
+        $this->data['request'] = [
             'uri'     => (string)$request->getUri(),
             'method'  => strtoupper($request->getMethod()),
-            'headers' => Util::flattenHeaders($request->getHeaders()),
+            'headers' => json_encode(Util::flattenHeaders($request->getHeaders())),
             'body'    => $this->parseBody($request),
-        ]);
+        ];
     }
 
     public function finish($response): void
@@ -39,7 +39,7 @@ final class HttpClientTransaction
 
         if ($response instanceof ResponseInterface) {
             $this->data['response'] = [
-                'headers'     => Util::flattenHeaders($response->getHeaders()),
+                'headers'     => json_encode(Util::flattenHeaders($response->getHeaders())),
                 'status_code' => $response->getStatusCode(),
                 'body'        => $this->parseBody($response),
             ];
@@ -48,7 +48,7 @@ final class HttpClientTransaction
         }
 
         if (is_scalar($response) || is_array($response)) {
-            $this->data['response'] = $response;
+            $this->data['response'] = is_array($response) ? json_encode($response) : $response;
         }
     }
 
@@ -59,12 +59,10 @@ final class HttpClientTransaction
 
     private function parseBody(MessageInterface $message)
     {
-        if ($contentType = $message->getHeader('Content-Type')) {
-            if (false !== array_search('application/json', $contentType)) {
-                return json_decode($message->getBody()->getContents(), true);
-            }
-        }
+        $message->getBody()->seek(0);
+        $body = (string) $message->getBody();
+        $message->getBody()->seek(0);
 
-        return $message->getBody()->getContents();
+        return (string) $body;
     }
 }

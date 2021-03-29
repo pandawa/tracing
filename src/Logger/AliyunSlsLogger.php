@@ -45,7 +45,7 @@ final class AliyunSlsLogger implements Logger
             $event->getSource() ?? $this->options['source'],
             [
                 new LogItem(array_merge(
-                    Arr::dot($event->getData()),
+                    array_filter(Arr::dot($event->getData())),
                     ['_trace_id' => (string)$traceId]
                 )),
             ]

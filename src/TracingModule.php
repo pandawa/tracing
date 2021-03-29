@@ -62,7 +62,7 @@ final class TracingModule extends AbstractModule
         $service = $this->app[$service];
 
         if ($service instanceof HttpClient) {
-            $service->addPlugin(
+            $service->prependPlugin(
                 new PavanaTracePlugin(
                     $this->app[TracerContract::class],
                     $options['topic'] ?? null,
