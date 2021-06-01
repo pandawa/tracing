@@ -51,7 +51,13 @@ final class AliyunSlsLogger implements Logger
             ]
         );
 
-        $this->client->putLogs($request);
+        try {
+            $this->client->putLogs($request);
+        } catch (\Exception $e) {
+            if (0 !== $e->getCode()) {
+                throw $e;
+            }
+        }
 
         return $traceId;
     }
