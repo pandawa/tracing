@@ -20,7 +20,7 @@ final class Middleware
 
     public function handle(Request $request, Closure $next)
     {
-        if (app()->bound(Tracer::class)) {
+        if (app()->bound(Tracer::class) && $this->shouldCapture($request)) {
             $this->transaction = new HttpServerTransaction();
             $this->transaction->start($request);
         }
@@ -41,5 +41,48 @@ final class Middleware
                 Util::getServerIp()
             ));
         }
+    }
+
+    private function shouldCapture(Request $request): bool
+    {
+        if (null !== $only = $this->only($request)) {
+            return $only;
+        }
+
+        return $this->except($request);
+    }
+
+    private function only(Request $request): ?bool
+    {
+        $only = config('tracing.route.only', []);
+
+        if (empty($only)) {
+            return null;
+        }
+
+        foreach ($only as $path) {
+            if ($request->is(ltrim($path, '/'))) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function except(Request $request): bool
+    {
+        $excepts = config('tracing.route.excepts', []);
+
+        if (empty($excepts)) {
+            return true;
+        }
+
+        foreach ($excepts as $path) {
+            if ($request->is(ltrim($path, '/'))) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

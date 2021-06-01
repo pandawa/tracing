@@ -13,6 +13,16 @@ return [
     // Trace pavana http client. Register the service key of pavana http client
     'pavana' => [],
 
+    // Trace pavana http incoming request
+    'route' => [
+        'only' => [
+            // Capture request only for these routes
+        ],
+        'excepts' => [
+            // Capture request except for these routes
+        ],
+    ],
+
     // List of logger driver
     'loggers' => [
         'aliyun' => [
