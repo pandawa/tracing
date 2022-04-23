@@ -23,7 +23,7 @@
         "borobudur/exception": "^0.1@dev",
         "borobudur/parameter": "^0.1@dev",
         "lokielse/aliyun-open-api-sls": "^1.0",
-        "pandawa/pandawa": "^2.1|^3.0@dev|^4.0@dev|^4.0",
+        "pandawa/pandawa": "^1.0@beta|^2.1|^3.0@dev|^4.0@dev|^4.0",
         "pandawa/pavana": "^1.0.2|^1.1.2",
         "symfony/options-resolver": "^3.4.43|^4.4.11|^5.0.11"
     },
