@@ -4,35 +4,22 @@ declare(strict_types=1);
 
 namespace Pandawa\Tracing;
 
-use Illuminate\Contracts\Support\DeferrableProvider;
+use Illuminate\Contracts\Http\Kernel as HttpKernelInterface;
+use Pandawa\Bundle\DependencyInjectionBundle\Plugin\ImportServicesPlugin;
 use Pandawa\Bundle\FoundationBundle\Plugin\ImportConfigurationPlugin;
 use Pandawa\Component\Foundation\Bundle\Bundle;
 use Pandawa\Component\Foundation\Http\Kernel;
 use Pandawa\Contracts\Foundation\HasPluginInterface;
-use Illuminate\Contracts\Http\Kernel as HttpKernelInterface;
-use Pandawa\Tracing\Contract\LoggerInterface;
-use Pandawa\Tracing\Contract\TracerInterface;
-use Pandawa\Tracing\Middleware\TraceMiddleware;
-use Pandawa\Tracing\Plugin\PavanaTracePlugin;
 use Pandawa\Pavana\Contract\HttpClient;
+use Pandawa\Tracing\Contract\TracerInterface;
+use Pandawa\Tracing\Plugin\PavanaTracePlugin;
 use RuntimeException;
 
 /**
  * @author  Iqbal Maulana <iq.bluejack@gmail.com>
  */
-class TracingBundle extends Bundle implements HasPluginInterface, DeferrableProvider
+class TracingBundle extends Bundle implements HasPluginInterface
 {
-    protected array $deferred = [
-        'tracing.logger',
-        'tracing.tracer',
-        'tracing.middleware.http_server',
-        LogManager::class,
-        LoggerInterface::class,
-        Tracer::class,
-        TracerInterface::class,
-        TraceMiddleware::class,
-    ];
-
     public function boot(): void
     {
         $this->traceIncomingHttp();
@@ -43,6 +30,7 @@ class TracingBundle extends Bundle implements HasPluginInterface, DeferrableProv
     {
         return [
             new ImportConfigurationPlugin(),
+            new ImportServicesPlugin(),
         ];
     }
 
