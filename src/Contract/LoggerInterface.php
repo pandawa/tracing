@@ -5,11 +5,12 @@ declare(strict_types=1);
 namespace Pandawa\Tracing\Contract;
 
 use Pandawa\Tracing\Event;
+use Pandawa\Tracing\TraceId;
 
 /**
  * @author  Iqbal Maulana <iq.bluejack@gmail.com>
  */
-interface Tracer
+interface LoggerInterface
 {
-    public function capture(Event $event): void;
+    public function log(Event $event): ?TraceId;
 }

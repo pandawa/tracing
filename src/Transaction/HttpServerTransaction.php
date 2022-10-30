@@ -47,7 +47,7 @@ final class HttpServerTransaction
         return $this->data;
     }
 
-    private function getBody(Response $response)
+    private function getBody(Response $response): false|string
     {
         return $response->getContent();
     }

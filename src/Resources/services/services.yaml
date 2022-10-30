@@ -1,0 +1,11 @@
+tracing.logger:
+  class: Pandawa\Tracing\LogManager
+  alias: [Pandawa\Tracing\LogManager, Pandawa\Tracing\Contract\LoggerInterface]
+
+tracing.tracer:
+  class: Pandawa\Tracing\Tracer
+  alias: [Pandawa\Tracing\Tracer, Pandawa\Tracing\Contract\TracerInterface]
+
+tracing.middleware.http_server:
+  class: Pandawa\Tracing\Middleware\TraceMiddleware
+  alias: [Pandawa\Tracing\Middleware\TraceMiddleware]

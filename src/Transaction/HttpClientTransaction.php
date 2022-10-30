@@ -57,12 +57,12 @@ final class HttpClientTransaction
         return $this->data;
     }
 
-    private function parseBody(MessageInterface $message)
+    private function parseBody(MessageInterface $message): string
     {
         $message->getBody()->seek(0);
         $body = (string) $message->getBody();
         $message->getBody()->seek(0);
 
-        return (string) $body;
+        return $body;
     }
 }

@@ -8,7 +8,7 @@ use Aliyun\SLS\Client;
 use Aliyun\SLS\Models\LogItem;
 use Aliyun\SLS\Requests\PutLogsRequest;
 use Illuminate\Support\Arr;
-use Pandawa\Tracing\Contract\Logger;
+use Pandawa\Tracing\Contract\LoggerInterface;
 use Pandawa\Tracing\Event;
 use Pandawa\Tracing\TraceId;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -16,7 +16,7 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 /**
  * @author  Iqbal Maulana <iq.bluejack@gmail.com>
  */
-final class AliyunSlsLogger implements Logger
+final class AliyunSlsLogger implements LoggerInterface
 {
     private array $options;
     private Client $client;
@@ -41,11 +41,11 @@ final class AliyunSlsLogger implements Logger
         $request = new PutLogsRequest(
             $this->options['project'],
             $this->options['log_store'],
-            $event->getTopic() ?? $this->options['topic'],
-            $event->getSource() ?? $this->options['source'],
+            $event->topic ?? $this->options['topic'],
+            $event->source ?? $this->options['source'],
             [
                 new LogItem(array_merge(
-                    array_filter(Arr::dot($event->getData())),
+                    array_filter(Arr::dot($event->data)),
                     ['_trace_id' => (string)$traceId]
                 )),
             ]

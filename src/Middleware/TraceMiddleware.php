@@ -6,7 +6,7 @@ namespace Pandawa\Tracing\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Pandawa\Tracing\Contract\Tracer;
+use Pandawa\Tracing\Contract\TracerInterface;
 use Pandawa\Tracing\Event;
 use Pandawa\Tracing\Transaction\HttpServerTransaction;
 use Pandawa\Tracing\Util;
@@ -14,13 +14,13 @@ use Pandawa\Tracing\Util;
 /**
  * @author  Iqbal Maulana <iq.bluejack@gmail.com>
  */
-final class Middleware
+final class TraceMiddleware
 {
     private ?HttpServerTransaction $transaction = null;
 
     public function handle(Request $request, Closure $next)
     {
-        if (app()->bound(Tracer::class) && $this->shouldCapture($request)) {
+        if (app()->bound(TracerInterface::class) && $this->shouldCapture($request)) {
             $this->transaction = new HttpServerTransaction();
             $this->transaction->start($request);
         }
@@ -33,7 +33,7 @@ final class Middleware
         if ($this->transaction) {
             $this->transaction->finish($response);
 
-            app(Tracer::class)->capture(new Event(
+            app(TracerInterface::class)->capture(new Event(
                 array_merge(
                     $this->transaction->toArray(),
                     ['__tag__:__hostname__' => Util::getHostname()]

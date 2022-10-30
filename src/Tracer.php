@@ -4,26 +4,23 @@ declare(strict_types=1);
 
 namespace Pandawa\Tracing;
 
-use Pandawa\Tracing\Contract\Logger;
-use Pandawa\Tracing\Contract\Tracer as TracerContract;
+use Pandawa\Tracing\Contract\LoggerInterface;
+use Pandawa\Tracing\Contract\TracerInterface;
 use Pandawa\Tracing\Job\CaptureEvent;
 
 /**
  * @author  Iqbal Maulana <iq.bluejack@gmail.com>
  */
-final class Tracer implements TracerContract
+final class Tracer implements TracerInterface
 {
-    private Logger $logger;
-
-    public function __construct(Logger $logger)
+    public function __construct(private readonly LoggerInterface $logger)
     {
-        $this->logger = $logger;
     }
 
     public function capture(Event $event): void
     {
         if ($queue = config('tracing.capture_in_queue')) {
-            $this->captureLater($event, $queue, config('tracing.queue_connection'));
+            $this->captureInQueue($event, $queue, config('tracing.queue_connection'));
 
             return;
         }
@@ -36,7 +33,7 @@ final class Tracer implements TracerContract
         $this->logger->log($event);
     }
 
-    private function captureLater(Event $event, $queue, $connection): void
+    private function captureInQueue(Event $event, $queue, $connection): void
     {
         $job = new CaptureEvent($event);
 

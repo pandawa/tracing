@@ -6,7 +6,7 @@ namespace Pandawa\Tracing\Plugin;
 
 use Http\Client\Common\Plugin;
 use Http\Promise\Promise;
-use Pandawa\Tracing\Contract\Tracer;
+use Pandawa\Tracing\Contract\TracerInterface;
 use Pandawa\Tracing\Event;
 use Pandawa\Tracing\Transaction\HttpClientTransaction;
 use Pandawa\Tracing\Util;
@@ -17,10 +17,10 @@ use Psr\Http\Message\RequestInterface;
  */
 final class PavanaTracePlugin implements Plugin
 {
-    private Tracer $tracer;
+    private TracerInterface $tracer;
     private ?string $topic;
 
-    public function __construct(Tracer $tracer, ?string $topic)
+    public function __construct(TracerInterface $tracer, ?string $topic)
     {
         $this->tracer = $tracer;
         $this->topic = $topic;

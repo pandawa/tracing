@@ -6,7 +6,7 @@ namespace Pandawa\Tracing\Job;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Pandawa\Tracing\Contract\Logger;
+use Pandawa\Tracing\Contract\LoggerInterface;
 use Pandawa\Tracing\Event;
 
 /**
@@ -16,14 +16,11 @@ final class CaptureEvent implements ShouldQueue
 {
     use Queueable;
 
-    private Event $event;
-
-    public function __construct(Event $event)
+    public function __construct(public readonly Event $event)
     {
-        $this->event = $event;
     }
 
-    public function handle(Logger $logger): void
+    public function __invoke(LoggerInterface $logger): void
     {
         $logger->log($this->event);
     }
