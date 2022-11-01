@@ -10,7 +10,7 @@ use Pandawa\Bundle\FoundationBundle\Plugin\ImportConfigurationPlugin;
 use Pandawa\Component\Foundation\Bundle\Bundle;
 use Pandawa\Component\Foundation\Http\Kernel;
 use Pandawa\Contracts\Foundation\HasPluginInterface;
-use Pandawa\Pavana\Contract\HttpClient;
+use Pandawa\Pavana\HttpClient\HttpClient;
 use Pandawa\Tracing\Contract\TracerInterface;
 use Pandawa\Tracing\Plugin\PavanaTracePlugin;
 use RuntimeException;
@@ -45,7 +45,7 @@ class TracingBundle extends Bundle implements HasPluginInterface
     {
         $pavanaClients = $this->app['config']['tracing.pavana'] ?? [];
 
-        if (count($pavanaClients) && !class_exists('Pandawa\Pavana\Contract\HttpClient')) {
+        if (count($pavanaClients) && !class_exists(HttpClient::class)) {
             throw new RuntimeException(
                 'Pavana component was not installed. Please run "composer install pandawa/pavana".'
             );
