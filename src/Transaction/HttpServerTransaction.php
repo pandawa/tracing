@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pandawa\Tracing\Transaction;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Pandawa\Tracing\Util;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -49,6 +50,6 @@ final class HttpServerTransaction
 
     private function getBody(Response $response): false|string
     {
-        return $response->getContent();
+        return Util::normalizeContent($response->getContent(), $response->headers->get('Content-Type'));
     }
 }

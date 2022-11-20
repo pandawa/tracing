@@ -29,7 +29,7 @@ final class HttpClientTransaction
             'uri'     => (string)$request->getUri(),
             'method'  => strtoupper($request->getMethod()),
             'headers' => json_encode(Util::flattenHeaders($request->getHeaders())),
-            'body'    => $this->parseBody($request),
+            'body'    => $this->parseBody($request, array_first($request->getHeader('Content-Type') ?? [])),
         ];
     }
 
@@ -41,7 +41,7 @@ final class HttpClientTransaction
             $this->data['response'] = [
                 'headers'     => json_encode(Util::flattenHeaders($response->getHeaders())),
                 'status_code' => $response->getStatusCode(),
-                'body'        => $this->parseBody($response),
+                'body'        => $this->parseBody($response, array_first($response->getHeader('Content-Type') ?? [])),
             ];
 
             return;
@@ -57,12 +57,12 @@ final class HttpClientTransaction
         return $this->data;
     }
 
-    private function parseBody(MessageInterface $message): string
+    private function parseBody(MessageInterface $message, ?string $contentType = null): string
     {
         $message->getBody()->seek(0);
         $body = (string) $message->getBody();
         $message->getBody()->seek(0);
 
-        return $body;
+        return Util::normalizeContent($body, $contentType);
     }
 }
