@@ -8,6 +8,7 @@ use Pandawa\Tracing\Util;
 use Psr\Http\Message\MessageInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
+use Throwable;
 
 /**
  * @author  Iqbal Maulana <iq.bluejack@gmail.com>
@@ -50,6 +51,16 @@ final class HttpClientTransaction
         if (is_scalar($response) || is_array($response)) {
             $this->data['response'] = is_array($response) ? json_encode($response) : $response;
         }
+    }
+
+    public function error(Throwable $e): void
+    {
+        $this->data['finish_time'] = microtime(true);
+
+        $this->data['error'] = [
+            'code'    => $e->getCode(),
+            'message' => $e->getMessage(),
+        ];
     }
 
     public function toArray(): array
