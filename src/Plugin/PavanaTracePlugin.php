@@ -11,6 +11,7 @@ use Pandawa\Tracing\Event;
 use Pandawa\Tracing\Transaction\HttpClientTransaction;
 use Pandawa\Tracing\Util;
 use Psr\Http\Message\RequestInterface;
+use Throwable;
 
 /**
  * @author  Iqbal Maulana <iq.bluejack@gmail.com>
@@ -31,20 +32,42 @@ final class PavanaTracePlugin implements Plugin
         $transaction = new HttpClientTransaction();
         $promise = $next($request);
 
-        return $promise->then(function ($response) use ($request, $transaction) {
-            $transaction->start($request);
-            $transaction->finish($response);
+        return $promise->then(
+            function ($response) use ($request, $transaction) {
+                $transaction->start($request);
+                $transaction->finish($response);
 
-            $this->tracer->capture(new Event(
-                array_merge(
-                    $transaction->toArray(),
-                    ['__tag__:__hostname__' => Util::getHostname()]
-                ),
-                Util::getServerIp(),
-                $this->topic
-            ));
+                $this->tracer->capture(new Event(
+                    array_merge(
+                        $transaction->toArray(),
+                        ['__tag__:__hostname__' => Util::getHostname()]
+                    ),
+                    Util::getServerIp(),
+                    $this->topic
+                ));
 
-            return $response;
-        });
+                return $response;
+            },
+            function ($error) use ($request, $transaction) {
+                $transaction->start($request);
+
+                if ($error instanceof Throwable) {
+                    $transaction->error($error);
+
+                    $this->tracer->capture(new Event(
+                        array_merge(
+                            $transaction->toArray(),
+                            ['__tag__:__hostname__' => Util::getHostname()]
+                        ),
+                        Util::getServerIp(),
+                        $this->topic
+                    ));
+
+                    throw $error;
+                }
+
+                return $error;
+            }
+        );
     }
 }
