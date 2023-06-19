@@ -53,12 +53,7 @@ final class TracingModule extends AbstractModule
         $this->app->singleton(LogManager::class);
         $this->app->alias(LogManager::class, Logger::class);
 
-        $this->app->singleton(TracerContract::class, function ($app) {
-            return new Tracer(
-                $app[Logger::class],
-                $app['config']->get('tracing.filters')
-            );
-        });
+        $this->app->singleton(TracerContract::class, Tracer::class);
         $this->app->singleton(Middleware::class);
     }
 

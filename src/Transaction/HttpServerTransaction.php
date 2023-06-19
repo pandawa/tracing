@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pandawa\Tracing\Transaction;
 
 use Illuminate\Http\Request;
+use JsonException;
 use Pandawa\Tracing\Util;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -25,8 +26,8 @@ final class HttpServerTransaction
             'full_url'     => $request->fullUrl(),
             'method'       => strtoupper($request->method()),
             'headers'      => json_encode(Util::flattenHeaders($request->headers->all())),
-            'query_params' => json_encode($request->query->all()),
-            'body'         => $request->getContent(),
+            'query_params' => json_encode($this->filter($request->query->all())),
+            'body'         => $this->filterBody($request->getContent()),
             'client_ip'    => $request->ip(),
             'user_agent'   => $request->userAgent(),
         ];
@@ -50,5 +51,45 @@ final class HttpServerTransaction
     private function getBody(Response $response)
     {
         return $response->getContent();
+    }
+
+    private function filterBody(string $body): string
+    {
+        if ($this->isJson($body)) {
+            $data = $this->filter(json_decode($body, true));
+
+            return json_encode($data);
+        }
+
+        return $body;
+    }
+
+    private function filter(array $data): array
+    {
+        $filtered = [];
+        $filters = config('tracing.filters', []);
+
+        foreach ($data as $key => $value) {
+            if (is_array($value)) {
+                $value = $this->filter($value);
+            } else if (is_string($key) && in_array($key, $filters)) {
+                $value = '[FILTERED]';
+            }
+
+            $filtered[$key] = $value;
+        }
+
+        return $filtered;
+    }
+
+    private function isJson(string $value): bool
+    {
+        try {
+            json_decode($value, true, 512, JSON_THROW_ON_ERROR);
+        } catch (JsonException) {
+            return false;
+        }
+
+        return true;
     }
 }

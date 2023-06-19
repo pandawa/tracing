@@ -14,24 +14,14 @@ use Pandawa\Tracing\Job\CaptureEvent;
 final class Tracer implements TracerContract
 {
     private Logger $logger;
-    private array $filters = [];
 
-    public function __construct(Logger $logger, array $filters = [])
+    public function __construct(Logger $logger)
     {
         $this->logger = $logger;
-        $this->filters = $filters;
     }
 
     public function capture(Event $event): void
     {
-        if (!empty($this->filters) && count($event->getData())) {
-            $event = new Event(
-                $this->filter($event->getData()),
-                $event->getSource(),
-                $event->getTopic(),
-            );
-        }
-
         if ($queue = config('tracing.capture_in_queue')) {
             $this->captureLater($event, $queue, config('tracing.queue_connection'));
 
@@ -59,22 +49,5 @@ final class Tracer implements TracerContract
         }
 
         dispatch($job);
-    }
-
-    private function filter(array $data): array
-    {
-        $filtered = [];
-
-        foreach ($data as $key => $value) {
-            if (is_array($value)) {
-                $value = $this->filter($value);
-            } else if (is_string($key) && in_array($key, $this->filters)) {
-                $value = '[FILTERED]';
-            }
-
-            $filtered[$key] = $value;
-        }
-
-        return $filtered;
     }
 }
