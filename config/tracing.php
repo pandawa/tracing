@@ -23,6 +23,9 @@ return [
         ],
     ],
 
+    // Filter value for some keys
+    'filters' => [],
+
     // List of logger driver
     'loggers' => [
         'aliyun' => [
